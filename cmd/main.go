@@ -50,8 +50,8 @@ const (
 	
 	`
 	// CHOOSE ONE, EITHER FOR DOCKER OR LOCAL SETUP
-	MIGRATION_PATH = `file:///app/migrations` // DOCKER
-	// MIGRATION_PATH = `file://./migrations` // LOCAL
+	// MIGRATION_PATH = `file:///app/migrations` // DOCKER
+	MIGRATION_PATH = `file://./migrations` // LOCAL
 )
 
 func main() {
@@ -105,7 +105,7 @@ func main() {
 			logrus.Fatalf("Database migration failed: %v", err)
 		}
 		logrus.Info("Database migrations completed successfully. Exiting.")
-		os.Exit(0) // Exit after migrations
+		os.Exit(0)
 	}
 
 	// Initialize Elasticsearch
@@ -180,7 +180,7 @@ func runMigrations(dsn string) error {
 	if err != nil {
 		return fmt.Errorf("could not create migrate instance: %w", err)
 	}
-	defer m.Close() // Ensure migration instance is closed
+	defer m.Close()
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("failed to apply migrations: %w", err)

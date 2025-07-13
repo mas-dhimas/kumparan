@@ -8,14 +8,12 @@ import (
 	"github.com/lib/pq"
 )
 
-// Repository defines the interface for article data operations.
 type Repository interface {
 	CreateArticle(ctx context.Context, article *Article) (*Article, error)
 	GetArticles(ctx context.Context, filter *ArticleFilter) ([]*Article, error)
 	GetArticlesByID(ctx context.Context, filter *ArticleFilter, ids []string) ([]*Article, error) // For fetching full articles from ES IDs
 }
 
-// postgresRepository implements the Repository interface for PostgreSQL.
 type postgresRepository struct {
 	db *sql.DB
 }

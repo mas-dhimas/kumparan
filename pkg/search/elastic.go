@@ -33,7 +33,6 @@ func NewElasticsearchClient(url string) (*elastic.Client, error) {
 	}
 	logrus.Infof("Elasticsearch connected to %s (version %s, code %d)", info.Name, info.Version.Number, code)
 
-	// Create the index if it doesn't exist
 	exists, err := client.IndexExists(ArticleIndexName).Do(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check Elasticsearch index existence: %w", err)

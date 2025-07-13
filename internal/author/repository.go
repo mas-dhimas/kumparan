@@ -5,7 +5,6 @@ import (
 	"database/sql"
 )
 
-// Repository defines the interface for author data operations.
 type Repository interface {
 	CreateAuthor(ctx context.Context, author *Author) (*Author, error)
 	GetAuthorByName(ctx context.Context, name string) (*Author, error)

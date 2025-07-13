@@ -90,7 +90,7 @@ func TestGetAuthorByName_ScanError(t *testing.T) {
 
 	mock.ExpectQuery(`SELECT id, name FROM authors WHERE name = \$1`).
 		WithArgs("Bara Biri").
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow("auth-1")) // missing name
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow("auth-1"))
 
 	result, err := repo.GetAuthorByName(context.Background(), "Bara Biri")
 

@@ -58,7 +58,7 @@ func (s *articleService) PostArticle(ctx context.Context, req *CreateArticleRequ
 
 	// Index in Elasticsearch (synchronously for simplicity)
 	// In a high-throughput system, this would be asynchronous via a message queue
-	// (e.g., Kafka, RabbitMQ) to avoid blocking the API response and ensure reliability.
+	// to avoid blocking the API response and ensure reliability.
 	esDoc := map[string]interface{}{
 		"id":         createdArticle.ID,
 		"title":      createdArticle.Title,
@@ -120,10 +120,6 @@ func (s *articleService) GetArticles(ctx context.Context, filter *ArticleFilter)
 				return nil, fmt.Errorf("failed to retrieve articles details: %w", err)
 			}
 
-			// Re-sort articles based on Elasticsearch hit order (relevance)
-			// This is important if ES returns results not strictly by published_at
-			// For simplicity, we assume ES sort by published_at is sufficient here.
-			// If relevance sorting is needed, a map from ID to Article would be used.
 		}
 	} else {
 		logrus.WithField("filter", fmt.Sprintf("%#v", *filter)).Info("Performing PostgreSQL query for articles")

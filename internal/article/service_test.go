@@ -181,7 +181,7 @@ func TestPostArticle_ESIndexFailsButStillReturnsArticle(t *testing.T) {
 
 	result, err := service.PostArticle(context.Background(), req)
 
-	assert.NoError(t, err) // ES failure should not block article creation
+	assert.NoError(t, err)
 	assert.Equal(t, "art-1", result.ID)
 
 	mockRepo.AssertExpectations(t)
