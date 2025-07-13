@@ -1,0 +1,38 @@
+# Go build artifacts (generated locally, not needed in build context)
+*.a
+*.o
+*.so
+_test/
+*.test
+*.out
+coverage.out
+
+# Git artifacts
+.git
+.gitignore
+
+# Docker-specific files (not needed inside the image, or handled by Docker)
+Dockerfile
+docker-compose.yaml
+
+# Environment files (should be passed at runtime, not baked into the image)
+.env
+.env.example
+
+vendor/
+
+# IDE/Editor specific files
+.idea/
+.vscode/
+.project
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Binaries/executables generated locally (your Dockerfile builds its own)
+bin/
+
+# Logs and other temporary files
+*.log
+log/
+nohup.out

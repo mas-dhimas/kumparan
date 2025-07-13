@@ -1,0 +1,34 @@
+# Compiled Go binaries
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.test
+*.out
+
+# Project-specific build outputs
+bin/
+tmp/
+
+# Test results
+coverage.out
+
+# Dependencies
+vendor/
+
+# Environment variables
+.env
+
+# IDE and Editor files
+.idea/
+.vscode/
+.project
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Logs and other temporary files
+*.log
+log/
+nohup.out

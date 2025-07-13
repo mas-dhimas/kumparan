@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${SOURCE_DATA_POSTGRESDB_NAME}
+      POSTGRES_USER: ${SOURCE_DATA_POSTGRESDB_USERNAME}
+      POSTGRES_PASSWORD: ${SOURCE_DATA_POSTGRESDB_PASSWORD}
+    ports:
+      - "${SOURCE_DATA_POSTGRESDB_PORT}:${SOURCE_DATA_POSTGRESDB_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SOURCE_DATA_POSTGRESDB_USERNAME} -d ${SOURCE_DATA_POSTGRESDB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Disable security for local dev
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  backend-service-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SOURCE_DATA_POSTGRESDB_SERVER: ${SOURCE_DATA_POSTGRESDB_SERVER}
+      SOURCE_DATA_POSTGRESDB_PORT: ${SOURCE_DATA_POSTGRESDB_PORT}
+      SOURCE_DATA_POSTGRESDB_NAME: ${SOURCE_DATA_POSTGRESDB_NAME}
+      SOURCE_DATA_POSTGRESDB_USERNAME: ${SOURCE_DATA_POSTGRESDB_USERNAME}
+      SOURCE_DATA_POSTGRESDB_PASSWORD: ${SOURCE_DATA_POSTGRESDB_PASSWORD}
+      SERVICE_DATA_LOG_LEVEL: debug
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ./kumparan-be-test --migrate
+    restart: "no"
+
+  backend-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${SERVICE_DATA_PORT}:${SERVICE_DATA_PORT}"
+    environment:
+      SERVICE_DATA_LOG_LEVEL: ${SERVICE_DATA_LOG_LEVEL}
+      SERVICE_DATA_PORT: ${SERVICE_DATA_PORT}
+      SERVICE_DATA_RATE_LIMIT: ${SERVICE_DATA_RATE_LIMIT}
+      SOURCE_DATA_POSTGRESDB_SERVER: ${SOURCE_DATA_POSTGRESDB_SERVER}
+      SOURCE_DATA_POSTGRESDB_PORT: ${SOURCE_DATA_POSTGRESDB_PORT}
+      SOURCE_DATA_POSTGRESDB_NAME: ${SOURCE_DATA_POSTGRESDB_NAME}
+      SOURCE_DATA_POSTGRESDB_USERNAME: ${SOURCE_DATA_POSTGRESDB_USERNAME}
+      SOURCE_DATA_POSTGRESDB_PASSWORD: ${SOURCE_DATA_POSTGRESDB_PASSWORD}
+      SOURCE_DATA_POSTGRESDB_TIMEOUT: ${SOURCE_DATA_POSTGRESDB_TIMEOUT}
+      SOURCE_DATA_POSTGRESDB_MAX_CONNS: ${SOURCE_DATA_POSTGRESDB_MAX_CONNS}
+      SOURCE_DATA_POSTGRESDB_MIN_CONNS: ${SOURCE_DATA_POSTGRESDB_MIN_CONNS}
+      SOURCE_DATA_POSTGRESDB_MAX_CONN_LIFETIME: ${SOURCE_DATA_POSTGRESDB_MAX_CONN_LIFETIME} #seconds
+      SOURCE_DATA_POSTGRESDB_MAX_CONN_IDLE_TIME: ${SOURCE_DATA_POSTGRESDB_MAX_CONN_IDLE_TIME} #seconds
+      SOURCE_DATA_ELASTICSEARCH_URL: ${SOURCE_DATA_ELASTICSEARCH_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      backend-service-migrate:
+        condition: service_completed_successfully
+    command: ./kumparan-be-test
+
+volumes:
+  postgres_data:
+  es_data:
